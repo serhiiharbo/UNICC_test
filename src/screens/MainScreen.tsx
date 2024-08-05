@@ -1,5 +1,6 @@
-import React, {useState} from 'react';
+import React, {Fragment, useState} from 'react';
 import {
+  Button,
   FlatList,
   Image,
   ListRenderItem,
@@ -14,7 +15,13 @@ import {useDispatch, useSelector} from 'react-redux';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {IMAGE_BASE_URL} from '@env';
 
-import {fetchMovies, Movie, MovieStatus} from '../store/movieSlice';
+import {
+  clearCache,
+  fetchMovies,
+  Movie,
+  MovieStatus,
+  purgeMovies,
+} from '../store/movieSlice';
 import {AppDispatch, RootState} from '../store/store';
 import {IMAGE_PLACEHOLDER} from '../constants';
 
@@ -26,7 +33,7 @@ interface MovieItemProps {
 }
 
 interface MovieSelectorProps {
-  movies: Movie[];
+  results: Movie[];
   status: MovieStatus;
   error: string | null;
 }
@@ -34,12 +41,23 @@ interface MovieSelectorProps {
 const MainScreen: React.FC = () => {
   const [query, setQuery] = useState<string>('');
   const dispatch: AppDispatch = useDispatch();
-  const {movies, status, error}: MovieSelectorProps = useSelector(
+  const {results, status, error}: MovieSelectorProps = useSelector(
     (state: RootState) => state.movies,
   );
 
   const handleSearch = (): void => {
-    dispatch(fetchMovies(query));
+    if (query.trim().length > 0) {
+      dispatch(fetchMovies(query));
+    }
+  };
+
+  const handlePurge = (): void => {
+    setQuery('');
+    dispatch(purgeMovies());
+  };
+
+  const handleClearCache = (): void => {
+    dispatch(clearCache());
   };
 
   const renderItem: ListRenderItem<MovieItemProps> = ({item}) => (
@@ -71,10 +89,16 @@ const MainScreen: React.FC = () => {
         placeholder="Search movies"
         onSubmitEditing={handleSearch}
       />
+      {__DEV__ && (
+        <Fragment>
+          <Button title="Purge Movies" onPress={handlePurge} />
+          <Button title="Clear Cache" onPress={handleClearCache} />
+        </Fragment>
+      )}
       {status === 'loading' && <Text>Loading...</Text>}
       {error && <Text>Error: {error}</Text>}
       <FlatList
-        data={movies}
+        data={results}
         keyExtractor={item => item.id.toString()}
         renderItem={renderItem}
       />

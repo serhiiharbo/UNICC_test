@@ -13,9 +13,9 @@ const rootReducer = combineReducers({
 const store = configureStore({
   reducer: rootReducer,
   middleware: getDefaultMiddleware =>
+    // Fixes the issue "A non-serializable value was detected in an action, in the path: `register`"
     getDefaultMiddleware({serializableCheck: false}),
 });
-
 
 export {store};
 export type {RootState};

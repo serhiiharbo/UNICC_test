@@ -38,6 +38,14 @@ const MainScreen: React.FC = () => {
   const dispatch: AppDispatch = useDispatch();
   const {results, status, error, currentPage, totalPages}: MovieSelectorProps =
     useSelector((state: RootState) => state.movies);
+  const shouldShowLoading: boolean =
+    status === REQUEST_STATUS.LOADING &&
+    currentPage === 1 &&
+    results.length === 0;
+  const shouldShowError: boolean = Boolean(error);
+  const shouldShowLoadMore: boolean =
+    status === REQUEST_STATUS.LOADING &&
+    (currentPage > 1 || (currentPage === 1 && results.length > 0));
 
   const debounceTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const flatListRef = useRef<FlatList<MovieItemProps>>(null);
@@ -107,10 +115,8 @@ const MainScreen: React.FC = () => {
           <Button title="Clear Cache" onPress={handleClearCache} />
         </Fragment>
       )}
-      {status === REQUEST_STATUS.LOADING && currentPage === 1 && (
-        <Status.Loading />
-      )}
-      {error && <Status.Error error={error ?? ''} />}
+      {shouldShowLoading && <Status.Loading />}
+      {shouldShowError && <Status.Error error={error ?? ''} />}
       <FlatList
         ref={flatListRef}
         data={results}
@@ -119,7 +125,7 @@ const MainScreen: React.FC = () => {
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.5}
         ListFooterComponent={
-          status === REQUEST_STATUS.LOADING && currentPage > 1 ? (
+          shouldShowLoadMore ? (
             <ActivityIndicator size="large" color="#0000ff" />
           ) : null
         }

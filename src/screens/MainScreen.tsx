@@ -140,7 +140,9 @@ const MainScreen: React.FC = () => {
           <Button title="Clear Cache" onPress={handleClearCache} />
         </Fragment>
       )}
-      {status === REQUEST_STATUS.LOADING && <Status.Loading />}
+      {status === REQUEST_STATUS.LOADING && currentPage === 1 && (
+        <Status.Loading />
+      )}
       {error && <Status.Error error={error ?? ''} />}
       <FlatList
         ref={flatListRef}

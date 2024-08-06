@@ -29,6 +29,7 @@ import {
   IMAGE_PLACEHOLDER,
   REQUEST_STATUS,
 } from '../constants';
+import Status from '../components/status';
 
 interface MovieItemProps {
   id: number;
@@ -139,8 +140,8 @@ const MainScreen: React.FC = () => {
           <Button title="Clear Cache" onPress={handleClearCache} />
         </Fragment>
       )}
-      {status === REQUEST_STATUS.LOADING && <Text>Loading...</Text>}
-      {error && <Text>Error: {error}</Text>}
+      {status === REQUEST_STATUS.LOADING && <Status.Loading />}
+      {error && <Status.Error error={error ?? ''} />}
       <FlatList
         ref={flatListRef}
         data={results}

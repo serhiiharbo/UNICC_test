@@ -9,8 +9,8 @@ const movieCacheTransform = createTransform(
   (outboundState: Partial<MovieState>) => {
     // When rehydrating, merge cache back into the initial state structure
     return {
-      ...outboundState,
-      initialState,
+      ...initialState,
+      cache: outboundState.cache || {},
     };
   },
   {whitelist: ['movies']},

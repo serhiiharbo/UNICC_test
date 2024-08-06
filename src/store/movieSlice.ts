@@ -17,7 +17,10 @@ export interface MovieState {
   results: Movie[];
   status: MovieStatus;
   error: string | null;
-  cache: Record<string, Movie[]>;
+  cache: Record<
+    string,
+    {results: Movie[]; page: number; total_pages: number; query: string}
+  >;
   currentPage: number;
   totalPages: number;
 }
@@ -31,8 +34,15 @@ export const initialState: MovieState = {
   totalPages: 1,
 };
 
+interface FetchMoviesResponse {
+  results: Movie[];
+  page: number;
+  total_pages: number;
+  query: string;
+}
+
 export const fetchMovies = createAsyncThunk<
-  Movie[],
+  FetchMoviesResponse,
   {query: string; page: number},
   {rejectValue: string}
 >('movies/fetchMovies', async ({query, page}, {getState, rejectWithValue}) => {
@@ -40,7 +50,7 @@ export const fetchMovies = createAsyncThunk<
   const cacheKey = `${query}-${page}`;
   // Return cached results if available
   if (state.movies.cache[cacheKey]) {
-    return state.movies.cache[cacheKey];
+    return {...state.movies.cache[cacheKey], query};
   }
   // Otherwise, fetch the data from the API
   try {
@@ -56,7 +66,7 @@ export const fetchMovies = createAsyncThunk<
     });
     return {...response.data, query};
   } catch (err) {
-    const error: AxiosError = err;
+    const error: AxiosError = err as AxiosError;
     return rejectWithValue(error.message);
   }
 });

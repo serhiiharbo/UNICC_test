@@ -3,18 +3,13 @@ import {
   ActivityIndicator,
   Button,
   FlatList,
-  Image,
-  ListRenderItem,
   Platform,
   StatusBar,
   StyleSheet,
-  Text,
   TextInput,
-  View,
 } from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import {IMAGE_BASE_URL} from '@env';
 
 import {
   clearCache,
@@ -24,19 +19,11 @@ import {
   purgeMovies,
 } from '../store/movieSlice';
 import {AppDispatch, RootState} from '../store/store';
-import {
-  DEBOUNCE_TIMEOUT,
-  IMAGE_PLACEHOLDER,
-  REQUEST_STATUS,
-} from '../constants';
+import {DEBOUNCE_TIMEOUT, REQUEST_STATUS} from '../constants';
 import Status from '../components/status';
-
-interface MovieItemProps {
-  id: number;
-  title: string;
-  release_date: string;
-  poster_path: string | null;
-}
+import RenderMovieItem, {
+  MovieItemProps,
+} from '../components/RenderMovieItem.tsx';
 
 interface MovieSelectorProps {
   results: Movie[];
@@ -106,26 +93,6 @@ const MainScreen: React.FC = () => {
     dispatch(clearCache());
   }, [dispatch]);
 
-  const renderItem: ListRenderItem<MovieItemProps> = ({item}) => (
-    <View style={styles.item}>
-      <Image
-        source={
-          item.poster_path
-            ? {uri: `${IMAGE_BASE_URL}${item.poster_path}`}
-            : IMAGE_PLACEHOLDER
-        }
-        resizeMode="contain"
-        style={styles.image}
-      />
-      <View>
-        <Text style={styles.title}>{item.title}</Text>
-        <Text style={styles.year}>
-          {new Date(item.release_date).getFullYear()}
-        </Text>
-      </View>
-    </View>
-  );
-
   return (
     <SafeAreaView style={styles.container}>
       <TextInput
@@ -148,7 +115,7 @@ const MainScreen: React.FC = () => {
         ref={flatListRef}
         data={results}
         keyExtractor={(item, index) => `${item.id}-${index}-${currentPage}`}
-        renderItem={renderItem}
+        renderItem={RenderMovieItem}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.5}
         ListFooterComponent={
@@ -173,24 +140,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     borderColor: 'gray',
     borderWidth: 1,
-  },
-  item: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  image: {
-    width: 50,
-    height: 75,
-    marginRight: 16,
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  year: {
-    fontSize: 14,
-    color: 'gray',
   },
 });
 
